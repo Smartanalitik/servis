@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Analitik – Teknik Servis Raporu</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#2b2d3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Servis Raporu">
+<script src="config.js"></script>
+<style>
+  :root{--ink:#1f2230;--bar:#2b2d3a;--blue:#1e88e5;--line:#d5d9df;--bg:#f2f4f7;--red:#c62828;--ok:#2e7d32}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+  header{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .logo{display:flex;align-items:center;gap:6px}
+  .logo svg{width:34px;height:26px}
+  .logo b{font-size:20px;font-weight:900;letter-spacing:.5px;line-height:1}
+  .logo small{display:block;font-size:8px;font-weight:700;letter-spacing:4px;text-align:right}
+  header h1{font-size:14px;margin:0 0 0 auto;text-align:right;font-weight:700}
+  main{max-width:720px;margin:0 auto;padding:12px 12px 120px}
+  .queue{background:#e8f1fd;border:1px solid #b6d2f7;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .queue .btn{padding:8px 12px;font-size:14px}
+  .demo{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .card{background:#fff;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .card h2{margin:0;background:var(--bar);color:#fff;font-size:15px;padding:10px 14px;font-weight:600}
+  .body{padding:12px 14px}
+  label{display:block;font-size:13px;color:#555;margin:10px 0 4px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-color:transparent}
+  textarea{min-height:140px;resize:vertical;line-height:1.45}
+  .req::after{content:" *";color:var(--red)}
+  .dev{display:grid;grid-template-columns:28px 1fr 1fr 34px;gap:6px;align-items:center;margin-bottom:8px}
+  .dev .n{font-size:13px;color:#777;text-align:center}
+  .dev input{padding:10px}
+  .x{border:none;background:#f0f1f3;border-radius:8px;height:40px;font-size:18px;color:#777}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font:inherit;font-weight:600;cursor:pointer}
+  .ghost{background:#eef4fd;color:var(--blue)}
+  .primary{background:var(--blue);color:#fff;width:100%;font-size:17px;padding:15px}
+  .primary:disabled{opacity:.6}
+  .sigwrap{position:relative;border:1px dashed #9aa3ad;border-radius:10px;background:#fcfcfd;height:160px}
+  .sigwrap canvas{width:100%;height:100%;display:block;border-radius:10px;cursor:pointer}
+  .sigfull{position:fixed;inset:0;background:#fff;z-index:40;display:none;flex-direction:column}
+  .sigfull .top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));border-bottom:1px solid var(--line)}
+  .sigfull .top b{font-size:16px}
+  .sigfull .top span{font-size:12px;color:#888}
+  .sigfull .area{flex:1;position:relative;margin:10px;border:1px dashed #9aa3ad;border-radius:12px;background:#fcfcfd}
+  .sigfull canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;border-radius:12px}
+  .sigfull .base{position:absolute;left:8%;right:8%;bottom:28%;border-bottom:1px solid #c9ced6;pointer-events:none}
+  .sigfull .x{position:absolute;left:8%;bottom:calc(28% + 4px);color:#c9ced6;font-size:22px;pointer-events:none}
+  .sigfull .btns{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  .sigfull .btns .btn{flex:1}
+  .sigwrap .hint{position:absolute;inset:auto 0 8px 0;text-align:center;font-size:12px;color:#aaa;pointer-events:none}
+  .sigwrap .clr{position:absolute;top:6px;right:6px;font-size:12px;padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chk{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px;background:#eef4fd;border-radius:10px;font-size:15px;color:var(--ink)}
+  .chk input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  .bar .in{max-width:720px;margin:0 auto}
+  .err{color:var(--red);font-size:14px;margin:0 0 8px;display:none}
+  .muted{font-size:12px;color:#888}
+  .overlay{position:fixed;inset:0;background:rgba(20,22,30,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:#fff;width:100%;max-width:720px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+  .sheet h3{margin:0 0 10px}
+  .sum{font-size:14px;line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .center{text-align:center}
+  .big{font-size:44px}
+  .spin{width:42px;height:42px;border:4px solid #dfe6ee;border-top-color:var(--blue);border-radius:50%;animation:s 1s linear infinite;margin:10px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+  @media (max-width:420px){.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 34 26"><path d="M0 0L16 13L0 26Z" fill="#1e88e5"/><path d="M8 0L24 13L8 26" fill="none" stroke="#1f2230" stroke-width="1.6"/><path d="M15 0L31 13L15 26" fill="none" stroke="#1f2230" stroke-width="1.6"/></svg>
+    <div><b>SMART</b><small>ANALİTİK</small></div>
+  </div>
+  <h1>Teknik Servis<br>Raporu</h1>
+</header>
+
+<main>
+  <a href="anket-gonder.html" style="display:block;text-align:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:12px;color:var(--blue);text-decoration:none;font-weight:600">📨 Servis raporu olmadan sadece anket gönder</a>
+  <div class="queue" id="queue" style="display:none"><span id="queueTxt"></span><button class="btn ghost" type="button" id="queueBtn">Şimdi gönder</button></div>
+  <div class="demo" id="demo" style="display:none">Önizleme modu: config.js içinde API adresi ayarlanmamış, gönderimde e-posta gitmez.</div>
+
+  <section class="card" id="pinCard" style="display:none">
+    <h2>Erişim</h2>
+    <div class="body"><label class="req" for="pin">PIN kodu</label><input id="pin" type="password" inputmode="numeric" autocomplete="off">
+      <button class="btn ghost" type="button" id="pinBtn" style="margin-top:10px">Giriş</button>
+      <p class="muted" style="margin:8px 0 0">PIN bu telefonda hatırlanır, bir kez girmeniz yeterli.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Müşteri Bilgileri</h2>
+    <div class="body">
+      <label class="req" for="firma">Firma Adı</label>
+      <input id="firma" list="firmaList" autocomplete="off" placeholder="Yazmaya başlayın, kayıtlı firmalar önerilir">
+      <datalist id="firmaList"></datalist>
+      <label for="adres">Adres</label><input id="adres">
+      <label for="yetkili">Firma Yetkilisi</label><input id="yetkili">
+      <div class="row2">
+        <div><label class="req" for="email">e-mail</label><input id="email" type="email" inputmode="email" autocapitalize="off" placeholder="rapor bu adrese gider"></div>
+        <div><label for="telefon">Telefon</label><input id="telefon" type="tel" inputmode="tel"></div>
+      </div>
+      <p class="muted" style="margin:6px 0 0">Birden fazla adres için virgülle ayırın.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Cihaz Bilgileri</h2>
+    <div class="body">
+      <div class="dev muted" style="margin-bottom:4px"><span class="n">#</span><span>Cihaz Modeli</span><span>Cihaz Seri No</span><span></span></div>
+      <div id="devs"></div>
+      <button class="btn ghost" type="button" id="addDev">+ Cihaz ekle</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Açıklama</h2>
+    <div class="body"><textarea id="aciklama" placeholder="Yapılan işlemler, değişen parçalar, tespitler, öneriler…"></textarea></div>
+  </section>
+
+  <section class="card">
+    <h2>Onay</h2>
+    <div class="body">
+      <label class="req" for="personel">Servis Sorumlusu</label>
+      <select id="personel"><option value="">Seçin…</option></select>
+      <label>Servis Sorumlusu İmzası</label>
+      <div class="sigwrap"><canvas id="sigS"></canvas><span class="hint">✍️ Dokunun – büyük ekranda imzalayın</span><button type="button" class="clr" data-pad="S">Temizle</button></div>
+
+      <label for="imzaYetkiliAd">Firma Yetkilisi (imzalayan)</label>
+      <input id="imzaYetkiliAd" placeholder="Ad Soyad">
+      <label id="sigYLabel">Firma Yetkilisi İmzası</label>
+      <div class="sigwrap"><canvas id="sigY"></canvas><span class="hint">✍️ Dokunun – müşteriye büyük ekranda imzalatın</span><button type="button" class="clr" data-pad="Y">Temizle</button></div>
+      <label class="chk" id="anketRow" style="display:none"><input type="checkbox" id="anket"> <span id="anketTxt">2 saat sonra müşteriye memnuniyet anketi gönder</span></label>
+      <p class="muted" style="margin:10px 0 0">Tarih ve Sıra No gönderimde otomatik verilir.</p>
+    </div>
+  </section>
+</main>
+
+<div class="bar"><div class="in">
+  <p class="err" id="err"></p>
+  <button class="btn primary" id="sendBtn" type="button">Raporu Gönder</button>
+</div></div>
+
+<div class="sigfull" id="sigFull">
+  <div class="top"><div><b id="sigTitle">İmza</b><br><span>Daha geniş alan için telefonu yan çevirebilirsiniz</span></div>
+    <button class="btn" type="button" id="sigClear" style="background:#f0f1f3;padding:8px 14px">Temizle</button></div>
+  <div class="area"><div class="base"></div><div class="x">✕</div><canvas id="sigBig"></canvas></div>
+  <div class="btns"><button class="btn" type="button" id="sigCancel" style="background:#f0f1f3">Vazgeç</button>
+    <button class="btn primary" type="button" id="sigOk" style="width:auto;font-size:16px;padding:12px">Tamam</button></div>
+</div>
+
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script>
+(function(){
+  var CFG = window.SA_CONFIG || {};
+  var API = String(CFG.API_URL || '').trim().replace(/\/a\/macros\/[^\/]+\//, '/macros/');
+  var LIVE = /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API);
+  var PIN_KEY = 'sa_servis_pin', INIT_KEY = 'sa_servis_init_v1';
+  // ---------- API (Google'a hesapsız istek: hesap karışıklığı hatası olmaz) ----------
+  function apiGet(params){
+    var q = Object.keys(params).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(params[k]); }).join('&');
+    return fetch(API + '?' + q, { credentials:'omit' }).then(function(r){ return r.json(); })
+      .then(function(j){ if(!j.ok) throw new Error(j.error || 'Sunucu hatası'); return j.result; });
+  }
+  function apiPost(body){
+    return fetch(API, { method:'POST', credentials:'omit', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(!j.ok) throw new Error(j.error || 'Sunucu hatası'); return j.result; });
+  }
+  function siteUrl(){ return location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, ''); }
+  var DRAFT_KEY = 'sa_servis_taslak_v1', STAFF_KEY = 'sa_servis_personel';
+  var state = { customers: [], pinRequired: false, requireSig: false };
+  var $ = function(id){ return document.getElementById(id); };
+  var store = {
+    get: function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set: function(k,v){ try { localStorage.setItem(k,v); } catch(e){} },
+    del: function(k){ try { localStorage.removeItem(k); } catch(e){} }
+  };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  // ---------- Cihaz satırları ----------
+  function addDevice(model, seri){
+    var row = document.createElement('div'); row.className = 'dev';
+    row.innerHTML = '<span class="n"></span><input class="m" placeholder="Model"><input class="s" placeholder="Seri No"><button type="button" class="x" aria-label="Sil">×</button>';
+    row.querySelector('.m').value = model || ''; row.querySelector('.s').value = seri || '';
+    row.querySelector('.x').onclick = function(){ row.remove(); if(!$('devs').children.length) addDevice(); renumber(); saveDraft(); };
+    $('devs').appendChild(row); renumber();
+  }
+  function renumber(){ Array.prototype.forEach.call($('devs').children, function(r,i){ r.querySelector('.n').textContent = i+1; }); }
+  function devices(){ return Array.prototype.map.call($('devs').children, function(r){ return { model: r.querySelector('.m').value.trim(), seri: r.querySelector('.s').value.trim() }; }).filter(function(d){ return d.model || d.seri; }); }
+  $('addDev').onclick = function(){ addDevice(); var l=$('devs').lastChild; l.querySelector('.m').focus(); };
+
+  // ---------- İmza ----------
+  // Küçük kutu önizleme gösterir; dokununca tam ekran imza alanı açılır.
+  function makePad(canvas){
+    var ctx = canvas.getContext('2d'), img = '';
+    function setup(){
+      var r = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
+      canvas.width = Math.max(1, r.width*dpr); canvas.height = Math.max(1, r.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    function show(){
+      setup(); var hint = canvas.parentNode.querySelector('.hint');
+      if(!img){ hint.style.display=''; return; }
+      hint.style.display='none';
+      var im = new Image();
+      im.onload = function(){
+        var r = canvas.getBoundingClientRect(), pad = 10;
+        var s = Math.min((r.width-2*pad)/im.width, (r.height-2*pad)/im.height, 1.5);
+        var w = im.width*s, hh = im.height*s;
+        ctx.drawImage(im, (r.width-w)/2, (r.height-hh)/2, w, hh);
+      };
+      im.src = img;
+    }
+    var pad = {
+      clear: function(){ img=''; show(); },
+      isEmpty: function(){ return !img; },
+      data: function(){ return img; },
+      set: function(d){ img = d || ''; show(); }
+    };
+    canvas.addEventListener('click', function(){ openSig(pad, canvas.getAttribute('data-title')); });
+    setup();
+    return pad;
+  }
+
+  // ---------- Tam ekran imza ----------
+  var big = $('sigBig'), bctx = big.getContext('2d'), bDraw=false, bDirty=false, bLast=null, curPad=null;
+  function bigSetup(keep){
+    var snap = (keep && bDirty) ? big.toDataURL('image/png') : null;
+    var r = big.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
+    big.width = Math.max(1, r.width*dpr); big.height = Math.max(1, r.height*dpr);
+    bctx.setTransform(dpr,0,0,dpr,0,0); bctx.lineWidth=3.2; bctx.lineCap='round'; bctx.lineJoin='round'; bctx.strokeStyle='#14213d';
+    if(snap){ var im=new Image(); im.onload=function(){ bctx.drawImage(im,0,0,r.width,r.height); }; im.src=snap; }
+    else bDirty=false;
+  }
+  function bpos(e){ var r = big.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  big.addEventListener('pointerdown', function(e){ bDraw=true; bLast=bpos(e); try{big.setPointerCapture(e.pointerId);}catch(_){}
+    bctx.beginPath(); bctx.arc(bLast.x,bLast.y,1.4,0,Math.PI*2); bctx.fillStyle='#14213d'; bctx.fill(); bDirty=true; e.preventDefault(); });
+  big.addEventListener('pointermove', function(e){
+    if(!bDraw) return; var p = bpos(e);
+    bctx.beginPath(); bctx.moveTo(bLast.x,bLast.y); bctx.lineTo(p.x,p.y); bctx.stroke(); bLast=p; bDirty=true; e.preventDefault();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(t){ big.addEventListener(t, function(){ bDraw=false; }); });
+
+  // Mürekkebin olduğu alanı kırpar, gerekirse küçültür
+  function trimmed(){
+    var w = big.width, hh = big.height, d = bctx.getImageData(0,0,w,hh).data;
+    var x0=w, y0=hh, x1=-1, y1=-1;
+    for(var y=0; y<hh; y+=2){ for(var x=0; x<w; x+=2){ if(d[(y*w+x)*4+3] > 20){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } } }
+    if(x1 < 0) return '';
+    var m = 12; x0=Math.max(0,x0-m); y0=Math.max(0,y0-m); x1=Math.min(w-1,x1+m); y1=Math.min(hh-1,y1+m);
+    var cw = x1-x0+1, ch = y1-y0+1, s = Math.min(1, 900/cw, 400/ch);
+    var c = document.createElement('canvas'); c.width = Math.round(cw*s); c.height = Math.round(ch*s);
+    c.getContext('2d').drawImage(big, x0, y0, cw, ch, 0, 0, c.width, c.height);
+    return c.toDataURL('image/png');
+  }
+  function openSig(pad, title){
+    curPad = pad; $('sigTitle').textContent = title || 'İmza';
+    $('sigFull').style.display = 'flex'; document.body.style.overflow = 'hidden';
+    bigSetup(false);
+  }
+  function closeSig(){ $('sigFull').style.display = 'none'; document.body.style.overflow = ''; curPad = null; }
+  $('sigClear').onclick = function(){ bigSetup(false); };
+  $('sigCancel').onclick = closeSig;
+  $('sigOk').onclick = function(){ if(curPad) curPad.set(bDirty ? trimmed() : curPad.data()); closeSig(); };
+  window.addEventListener('resize', function(){ if($('sigFull').style.display === 'flex') setTimeout(function(){ bigSetup(true); }, 250); });
+
+  $('sigS').setAttribute('data-title', 'Servis Sorumlusu İmzası');
+  $('sigY').setAttribute('data-title', 'Firma Yetkilisi İmzası');
+  var pads = { S: makePad($('sigS')), Y: makePad($('sigY')) };
+  Array.prototype.forEach.call(document.querySelectorAll('.clr'), function(b){ b.onclick = function(e){ e.stopPropagation(); pads[b.getAttribute('data-pad')].clear(); }; });
+
+  // ---------- Müşteri otomatik doldurma ----------
+  function fillCustomers(list){
+    state.customers = list || [];
+    $('firmaList').innerHTML = state.customers.map(function(c){ return '<option value="'+esc(c.firma)+'">'; }).join('');
+  }
+  $('firma').addEventListener('change', function(){
+    var v = this.value.trim().toLocaleLowerCase('tr');
+    var c = state.customers.filter(function(x){ return x.firma.toLocaleLowerCase('tr') === v; })[0];
+    if(!c) return;
+    ['adres','yetkili','email','telefon'].forEach(function(k){ if(!$(k).value.trim()) $(k).value = c[k] || ''; });
+    if(!$('imzaYetkiliAd').value.trim()) $('imzaYetkiliAd').value = c.yetkili || '';
+    saveDraft();
+  });
+  $('yetkili').addEventListener('change', function(){ if(!$('imzaYetkiliAd').value.trim()) $('imzaYetkiliAd').value = this.value; });
+
+  function fillStaff(staff){
+    var sel = $('personel'), cur = sel.value;
+    sel.innerHTML = '<option value="">Seçin…</option>';
+    staff.forEach(function(s){ var o=document.createElement('option'); o.value=o.textContent=s; sel.appendChild(o); });
+    var saved = cur || store.get(STAFF_KEY); if(saved && staff.indexOf(saved)>=0) sel.value = saved;
+  }
+  $('personel').addEventListener('change', function(){ store.set(STAFF_KEY, this.value); });
+
+  // ---------- Taslak (bağlantı koparsa kaybolmasın) ----------
+  var FIELDS = ['firma','adres','yetkili','email','telefon','aciklama','imzaYetkiliAd'];
+  function collect(){ var d={}; FIELDS.forEach(function(k){ d[k]=$(k).value.trim(); }); d.personel=$('personel').value; d.devices=devices(); d.anket=$('anket').checked && state.surveyEnabled; return d; }
+  function saveDraft(){ store.set(DRAFT_KEY, JSON.stringify(collect())); }
+  function loadDraft(){
+    var raw = store.get(DRAFT_KEY), d=null; try{ d = raw && JSON.parse(raw); }catch(e){}
+    if(d){ FIELDS.forEach(function(k){ if(d[k]) $(k).value=d[k]; }); }
+    var list = d && d.devices && d.devices.length ? d.devices : [{}];
+    list.forEach(function(x){ addDevice(x.model, x.seri); });
+  }
+  document.addEventListener('input', function(e){ if(e.target.matches('input:not(#pin),textarea')) saveDraft(); });
+
+  // ---------- Doğrulama + gönderim ----------
+  function showErr(m){ var e=$('err'); e.textContent=m||''; e.style.display=m?'block':'none'; }
+  function validate(d){
+    if(state.pinRequired && !$('pin').value) return 'PIN kodunu girin.';
+    if(!d.firma) return 'Firma adı zorunlu.';
+    var em = d.email.replace(/\s+/g,'').split(/[;,]/).filter(Boolean);
+    if(!em.length || !em.every(function(x){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x); })) return 'Geçerli bir müşteri e-posta adresi girin.';
+    if(!d.devices.length && !d.aciklama) return 'En az bir cihaz veya açıklama girin.';
+    if(!d.personel) return 'Servis sorumlusunu seçin.';
+    if(state.requireSig && pads.Y.isEmpty()) return 'Firma yetkilisi imzası gerekli.';
+    return '';
+  }
+  function openSheet(html){ $('sheet').innerHTML = html; $('ov').style.display='flex'; }
+  function closeSheet(){ $('ov').style.display='none'; }
+
+  $('sendBtn').onclick = function(){
+    var d = collect(), m = validate(d); showErr(m); if(m) return;
+    openSheet(
+      '<h3>Gönderilsin mi?</h3><div class="sum">' +
+      '<b>'+esc(d.firma)+'</b><br>Alıcı: '+esc(d.email)+'<br>Cihaz: '+d.devices.length+' adet<br>Servis Sorumlusu: '+esc(d.personel) +
+      '<br>Memnuniyet anketi: '+(d.anket?'gönderilecek ✓':'gönderilmeyecek')+'<br>İmzalar: '+(pads.S.isEmpty()?'servis ✗':'servis ✓')+' · '+(pads.Y.isEmpty()?'müşteri ✗':'müşteri ✓')+'</div>' +
+      '<button class="btn primary" id="okSend">Evet, gönder</button>' +
+      '<button class="btn" style="width:100%;margin-top:8px;background:#f0f1f3" id="cancelSend">Düzenlemeye dön</button>');
+    $('cancelSend').onclick = closeSheet;
+    $('okSend').onclick = function(){ doSend(d); };
+  };
+
+  // ---------- Çevrimdışı kuyruk ----------
+  var QUEUE_KEY = 'sa_servis_kuyruk_v1', flushing = false;
+  function getQueue(){ try { return JSON.parse(store.get(QUEUE_KEY) || '[]'); } catch(e){ return []; } }
+  function setQueue(q){ store.set(QUEUE_KEY, JSON.stringify(q)); renderQueue(); }
+  function isNetErr(err){
+    var m = String((err && err.message) || err || '');
+    return !navigator.onLine || /network|connection|HTTP 0|zaman aşımı|timeout|failed to fetch|load failed|networkerror/i.test(m);
+  }
+  function renderQueue(){
+    var q = getQueue();
+    $('queue').style.display = q.length ? 'flex' : 'none';
+    $('queueTxt').innerHTML = '📥 Gönderilmeyi bekleyen <b>'+q.length+'</b> rapor' + (navigator.onLine ? '' : ' (internet yok)');
+  }
+  function queueReport(d){
+    var q = getQueue(); q.push(d);
+    try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
+    catch(e){ return false; }
+    renderQueue(); return true;
+  }
+  function flushQueue(manual){
+    if(flushing || !LIVE) return;
+    var q = getQueue(); if(!q.length) return;
+    if(!navigator.onLine){ if(manual) showErr('Hâlâ internet yok. Bağlantı gelince otomatik gönderilecek.'); return; }
+    flushing = true; $('queueTxt').innerHTML = '⏳ Bekleyen raporlar gönderiliyor…';
+    var item = q[0];
+    apiPost({ action:'submit', data:item }).then(function(res){
+      var rest = getQueue(); rest.shift(); setQueue(rest); flushing = false;
+      showErr(''); toast('✅ Bekleyen rapor gönderildi: No '+res.no+' ('+(item.firma||'')+')');
+      flushQueue(false);
+    }).catch(function(err){
+      flushing = false; renderQueue();
+      if(!isNetErr(err)) showErr('Bekleyen rapor gönderilemedi ('+esc(item.firma||'')+'): '+((err&&err.message)||''));
+    });
+  }
+  function toast(msg){
+    var t = document.createElement('div');
+    t.textContent = msg; t.style.cssText='position:fixed;left:12px;right:12px;top:70px;background:#2e7d32;color:#fff;padding:12px 14px;border-radius:10px;z-index:30;font-size:14px;text-align:center';
+    document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 4500);
+  }
+  $('queueBtn').onclick = function(){ flushQueue(true); };
+  window.addEventListener('online', function(){ renderQueue(); setTimeout(function(){ flushQueue(false); }, 1500); });
+  window.addEventListener('offline', renderQueue);
+
+  function savedOffline(d){
+    $('sendBtn').disabled = false; store.del(DRAFT_KEY);
+    openSheet('<div class="center"><div class="big">📥</div><h3>İnternet yok – rapor telefona kaydedildi</h3>' +
+      '<p>'+esc(d.firma)+' raporu imzalarıyla birlikte saklandı. İnternet gelince <b>otomatik gönderilecek</b>; ' +
+      'rapor numarası ve tarih servisin yapıldığı ana göre verilir.</p>' +
+      '<p class="muted">Gönderim için bu sayfayı internet varken bir kez açmanız yeterli.</p>' +
+      '<button class="btn primary" id="newR">Yeni rapor</button></div>');
+    $('newR').onclick = function(){ resetForm(); closeSheet(); };
+  }
+
+  function doSend(d){
+    d.imzaServis = pads.S.data(); d.imzaYetkili = pads.Y.data(); d.pin = $('pin').value || store.get(PIN_KEY) || ''; d.clientTime = Date.now(); d.siteUrl = siteUrl();
+    $('sendBtn').disabled = true;
+    if(LIVE && !navigator.onLine){
+      if(queueReport(d)) savedOffline(d);
+      else { $('sendBtn').disabled = false; closeSheet(); showErr('Telefonda yer kalmadı; rapor kaydedilemedi.'); }
+      return;
+    }
+    openSheet('<div class="center"><div class="spin"></div><p>Rapor hazırlanıyor ve gönderiliyor…</p><p class="muted">Bu birkaç saniye sürebilir.</p></div>');
+    var done = function(res){
+      $('sendBtn').disabled = false; store.del(DRAFT_KEY); if(d.pin) store.set(PIN_KEY, d.pin);
+      var ok = res.mailSent;
+      openSheet('<div class="center"><div class="big">'+(ok?'✅':'⚠️')+'</div><h3>Rapor No: '+esc(res.no)+'</h3>' +
+        '<p>'+(ok ? esc(d.email)+' adresine gönderildi.<br><span class="muted">Kopyası info@smartanalitik.com\'a düştü.</span>'
+                  : 'Rapor kaydedildi ama e-posta gönderilemedi:<br><span class="muted">'+esc(res.mailError)+'</span><br>E-Tablo menüsünden tekrar gönderebilirsiniz.') + '</p>' +
+        (res.pdfUrl ? '<p><a href="'+esc(res.pdfUrl)+'" target="_blank" rel="noopener">PDF\'i aç</a></p>' : '') +
+        '<button class="btn primary" id="newR">Yeni rapor</button></div>');
+      $('newR').onclick = function(){ resetForm(); closeSheet(); };
+    };
+    var fail = function(err){
+      if(isNetErr(err) && queueReport(d)){ savedOffline(d); return; }
+      $('sendBtn').disabled = false; closeSheet();
+      showErr((err && err.message) || 'Gönderilemedi. Bağlantınızı kontrol edip tekrar deneyin; bilgileriniz kayıtlı.');
+    };
+    if(LIVE){ apiPost({ action:'submit', data:d }).then(done).catch(fail); }
+    else { setTimeout(function(){ done({ no:'DEMO', mailSent:true, pdfUrl:'' }); }, 1200); }
+  }
+
+  function resetForm(){
+    FIELDS.forEach(function(k){ $(k).value=''; });
+    $('devs').innerHTML=''; addDevice(); pads.S.clear(); pads.Y.clear(); showErr(''); $('anket').checked = !!state.surveyDefault; window.scrollTo(0,0);
+  }
+
+  // ---------- Başlangıç ----------
+  loadDraft();
+  function init(data){
+    if(data.logo){ var lg=document.querySelector('.logo'); lg.innerHTML=''; var im=new Image(); im.src=data.logo; im.alt='Smart Analitik'; im.style.height='38px'; lg.appendChild(im); }
+    fillStaff(data.staff || []); fillCustomers(data.customers);
+    state.pinRequired = !!data.pinRequired; state.requireSig = !!data.requireCustomerSignature;
+    $('pinCard').style.display = (state.pinRequired && !data.pinOk) ? '' : 'none';
+    if(state.requireSig) $('sigYLabel').classList.add('req');
+    state.surveyEnabled = !!data.surveyEnabled; state.surveyDefault = !!data.surveyDefault;
+    if(state.surveyEnabled){ $('anketRow').style.display='flex'; if(!state.inited) $('anket').checked = state.surveyDefault;
+      $('anketTxt').textContent = (data.surveyDelay||2)+' saat sonra müşteriye memnuniyet anketi gönder'; }
+    state.inited = true;
+    renderQueue(); setTimeout(function(){ flushQueue(false); }, 800);
+  }
+  function loadInit(){
+    var pin = $('pin').value || store.get(PIN_KEY) || '';
+    apiGet({ action:'init', pin: pin }).then(function(data){
+      if(data.pinOk && pin) store.set(PIN_KEY, pin);
+      if(!data.pinOk && pin && $('pin').value) showErr('PIN kodu hatalı.');
+      else showErr('');
+      try { localStorage.setItem(INIT_KEY, JSON.stringify(data)); } catch(e){}
+      init(data);
+    }).catch(function(e){
+      if(!cached) showErr(isNetErr(e) ? 'İnternet yok. İlk açılış için internet gerekli.' : 'Sunucuya bağlanılamadı: '+((e&&e.message)||''));
+    });
+  }
+  var cached = null;
+  if(LIVE){
+    try { cached = JSON.parse(store.get(INIT_KEY) || 'null'); } catch(e){}
+    if(store.get(PIN_KEY)) $('pin').value = store.get(PIN_KEY);
+    if(cached) init(cached);           // internet yokken de form hazır olsun
+    loadInit();
+    $('pinBtn').onclick = function(){ if(!$('pin').value){ showErr('PIN kodunu girin.'); return; } loadInit(); };
+  } else {
+    $('demo').style.display='block';
+    init({ surveyEnabled:true, surveyDefault:true, surveyDelay:2, pinRequired:false, pinOk:true, staff:['Personel 1','Personel 2','Personel 3'], customers:[{firma:'Örnek Laboratuvar A.Ş.',adres:'Kadıköy / İstanbul',yetkili:'Ayşe Yılmaz',email:'ayse@ornek.com',telefon:'0532 000 00 00'}] });
+  }
+  // Uygulama dosyalarını telefona kaydet (internet yokken de açılsın)
+  if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Analitik – Sadece Anket Gönder</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#2b2d3a">
+<script src="config.js"></script>
+<style>
+  :root{--ink:#1f2230;--bar:#2b2d3a;--blue:#1e88e5;--line:#d5d9df;--bg:#f2f4f7;--red:#c62828;--ok:#2e7d32}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+  header{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .logo{display:flex;align-items:center;gap:6px}
+  .logo svg{width:34px;height:26px}
+  .logo b{font-size:20px;font-weight:900;letter-spacing:.5px;line-height:1}
+  .logo small{display:block;font-size:8px;font-weight:700;letter-spacing:4px;text-align:right}
+  header h1{font-size:14px;margin:0 0 0 auto;text-align:right;font-weight:700}
+  main{max-width:720px;margin:0 auto;padding:12px 12px 120px}
+  .queue{background:#e8f1fd;border:1px solid #b6d2f7;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .queue .btn{padding:8px 12px;font-size:14px}
+  .demo{background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .card{background:#fff;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .card h2{margin:0;background:var(--bar);color:#fff;font-size:15px;padding:10px 14px;font-weight:600}
+  .body{padding:12px 14px}
+  label{display:block;font-size:13px;color:#555;margin:10px 0 4px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);border-color:transparent}
+  textarea{min-height:140px;resize:vertical;line-height:1.45}
+  .req::after{content:" *";color:var(--red)}
+  .dev{display:grid;grid-template-columns:28px 1fr 1fr 34px;gap:6px;align-items:center;margin-bottom:8px}
+  .dev .n{font-size:13px;color:#777;text-align:center}
+  .dev input{padding:10px}
+  .x{border:none;background:#f0f1f3;border-radius:8px;height:40px;font-size:18px;color:#777}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;padding:12px 16px;font:inherit;font-weight:600;cursor:pointer}
+  .ghost{background:#eef4fd;color:var(--blue)}
+  .primary{background:var(--blue);color:#fff;width:100%;font-size:17px;padding:15px}
+  .primary:disabled{opacity:.6}
+  .sigwrap{position:relative;border:1px dashed #9aa3ad;border-radius:10px;background:#fcfcfd;height:160px}
+  .sigwrap canvas{width:100%;height:100%;display:block;border-radius:10px;cursor:pointer}
+  .sigfull{position:fixed;inset:0;background:#fff;z-index:40;display:none;flex-direction:column}
+  .sigfull .top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));border-bottom:1px solid var(--line)}
+  .sigfull .top b{font-size:16px}
+  .sigfull .top span{font-size:12px;color:#888}
+  .sigfull .area{flex:1;position:relative;margin:10px;border:1px dashed #9aa3ad;border-radius:12px;background:#fcfcfd}
+  .sigfull canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;border-radius:12px}
+  .sigfull .base{position:absolute;left:8%;right:8%;bottom:28%;border-bottom:1px solid #c9ced6;pointer-events:none}
+  .sigfull .x{position:absolute;left:8%;bottom:calc(28% + 4px);color:#c9ced6;font-size:22px;pointer-events:none}
+  .sigfull .btns{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  .sigfull .btns .btn{flex:1}
+  .sigwrap .hint{position:absolute;inset:auto 0 8px 0;text-align:center;font-size:12px;color:#aaa;pointer-events:none}
+  .sigwrap .clr{position:absolute;top:6px;right:6px;font-size:12px;padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chk{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px;background:#eef4fd;border-radius:10px;font-size:15px;color:var(--ink)}
+  .chk input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  .bar .in{max-width:720px;margin:0 auto}
+  .err{color:var(--red);font-size:14px;margin:0 0 8px;display:none}
+  .muted{font-size:12px;color:#888}
+  .overlay{position:fixed;inset:0;background:rgba(20,22,30,.55);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:#fff;width:100%;max-width:720px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+  .sheet h3{margin:0 0 10px}
+  .sum{font-size:14px;line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+  .center{text-align:center}
+  .big{font-size:44px}
+  .spin{width:42px;height:42px;border:4px solid #dfe6ee;border-top-color:var(--blue);border-radius:50%;animation:s 1s linear infinite;margin:10px auto}
+  @keyframes s{to{transform:rotate(360deg)}}
+  @media (max-width:420px){.row2{grid-template-columns:1fr}}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opts label{display:flex;align-items:center;gap:10px;margin:0;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;color:var(--ink)}
+  .opts input{width:20px;height:20px;accent-color:var(--blue)}
+  .back{display:inline-block;margin:0 0 12px;color:var(--blue);text-decoration:none;font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 34 26"><path d="M0 0L16 13L0 26Z" fill="#1e88e5"/><path d="M8 0L24 13L8 26" fill="none" stroke="#1f2230" stroke-width="1.6"/><path d="M15 0L31 13L15 26" fill="none" stroke="#1f2230" stroke-width="1.6"/></svg>
+    <div><b>SMART</b><small>ANALİTİK</small></div>
+  </div>
+  <h1>Teknik Servis<br>Raporu</h1>
+
+</header>
+<main>
+  <a class="back" href="index.html">← Servis raporuna dön</a>
+  <div class="demo" id="demo" style="display:none">Önizleme modu: config.js içinde API adresi ayarlanmamış, e-posta gitmez.</div>
+
+  <section class="card" id="pinCard" style="display:none">
+    <h2>Erişim</h2>
+    <div class="body"><label class="req" for="pin">PIN kodu</label><input id="pin" type="password" inputmode="numeric" autocomplete="off">
+      <p class="muted" style="margin:8px 0 0">PIN bu telefonda hatırlanır.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Sadece Memnuniyet Anketi Gönder</h2>
+    <div class="body">
+      <p class="muted" style="margin:0 0 6px">Servis raporu olmadan müşteriye F060-0010 memnuniyet anketi gönderir.</p>
+      <label class="req" for="firma">Firma Adı</label>
+      <input id="firma" list="firmaList" autocomplete="off" placeholder="Yazmaya başlayın, kayıtlı firmalar önerilir">
+      <datalist id="firmaList"></datalist>
+      <label for="yetkili">Firma Yetkilisi</label><input id="yetkili">
+      <label class="req" for="email">e-mail</label><input id="email" type="email" inputmode="email" autocapitalize="off" placeholder="anket bu adrese gider">
+      <label for="personel">Servis Sorumlusu (isteğe bağlı)</label>
+      <select id="personel"><option value="">—</option></select>
+      <label>Ne zaman gönderilsin?</label>
+      <div class="opts">
+        <label><input type="radio" name="zaman" value="now" checked> Hemen</label>
+        <label><input type="radio" name="zaman" value="2h"> 2 saat sonra</label>
+        <label><input type="radio" name="zaman" value="morning"> Yarın sabah 09:00</label>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="bar"><div class="in">
+  <p class="err" id="err"></p>
+  <button class="btn primary" id="sendBtn" type="button">Anketi Gönder</button>
+</div></div>
+
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var CFG = window.SA_CONFIG || {};
+  var API = String(CFG.API_URL || '').trim().replace(/\/a\/macros\/[^\/]+\//, '/macros/');
+  var LIVE = /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API);
+  var PIN_KEY = 'sa_servis_pin', INIT_KEY = 'sa_servis_init_v1', customers = [];
+  var store = {
+    get: function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set: function(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function showErr(m){ var e=$('err'); e.textContent=m||''; e.style.display=m?'block':'none'; }
+  function openSheet(h){ $('sheet').innerHTML=h; $('ov').style.display='flex'; }
+  function closeSheet(){ $('ov').style.display='none'; }
+  function siteUrl(){ return location.href.replace(/[?#].*$/, '').replace(/[^\/]*$/, ''); }
+  function apiGet(params){
+    var q = Object.keys(params).map(function(k){ return encodeURIComponent(k)+'='+encodeURIComponent(params[k]); }).join('&');
+    return fetch(API+'?'+q, { credentials:'omit' }).then(function(r){ return r.json(); })
+      .then(function(j){ if(!j.ok) throw new Error(j.error||'Sunucu hatası'); return j.result; });
+  }
+  function apiPost(body){
+    return fetch(API, { method:'POST', credentials:'omit', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json(); }).then(function(j){ if(!j.ok) throw new Error(j.error||'Sunucu hatası'); return j.result; });
+  }
+
+  function init(data){
+    if(data.logo){ var lg=document.querySelector('.logo'); lg.innerHTML=''; var im=new Image(); im.src=data.logo; im.alt='Smart Analitik'; im.style.height='38px'; lg.appendChild(im); }
+    var sel=$('personel'), cur=sel.value; sel.innerHTML='<option value="">—</option>';
+    (data.staff||[]).forEach(function(s){ var o=document.createElement('option'); o.value=o.textContent=s; sel.appendChild(o); });
+    sel.value = cur || store.get('sa_servis_personel') || '';
+    customers = data.customers || [];
+    $('firmaList').innerHTML = customers.map(function(c){ return '<option value="'+esc(c.firma)+'">'; }).join('');
+    $('pinCard').style.display = (data.pinRequired && !data.pinOk) ? '' : 'none';
+  }
+  $('firma').addEventListener('change', function(){
+    var v=this.value.trim().toLocaleLowerCase('tr');
+    var c=customers.filter(function(x){ return x.firma.toLocaleLowerCase('tr')===v; })[0];
+    if(!c) return;
+    if(!$('yetkili').value.trim()) $('yetkili').value=c.yetkili||'';
+    if(!$('email').value.trim()) $('email').value=c.email||'';
+  });
+
+  $('sendBtn').onclick = function(){
+    var d = { firma:$('firma').value.trim(), yetkili:$('yetkili').value.trim(), email:$('email').value.replace(/\s+/g,''),
+      personel:$('personel').value, zaman:(document.querySelector('input[name=zaman]:checked')||{}).value||'now',
+      pin: $('pin').value || store.get(PIN_KEY) || '', siteUrl: siteUrl() };
+    if(!d.firma) return showErr('Firma adı zorunlu.');
+    var em=d.email.split(/[;,]/).filter(Boolean);
+    if(!em.length || !em.every(function(x){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x); })) return showErr('Geçerli bir e-posta adresi girin.');
+    if(!navigator.onLine) return showErr('İnternet yok. Anket göndermek için internet gerekli.');
+    showErr('');
+    var zamanTxt = {now:'hemen', '2h':'2 saat sonra', morning:'yarın sabah 09:00\'da'}[d.zaman];
+    openSheet('<h3>Anket gönderilsin mi?</h3><div class="sum"><b>'+esc(d.firma)+'</b><br>Alıcı: '+esc(d.email)+'<br>Zaman: '+zamanTxt+'</div>'+
+      '<button class="btn primary" id="okSend">Evet, gönder</button>'+
+      '<button class="btn" style="width:100%;margin-top:8px;background:#f0f1f3" id="cancelSend">Vazgeç</button>');
+    $('cancelSend').onclick = closeSheet;
+    $('okSend').onclick = function(){
+      openSheet('<div class="center"><div class="spin"></div><p>Gönderiliyor…</p></div>'); $('sendBtn').disabled=true;
+      var done = function(res){
+        $('sendBtn').disabled=false; if(d.pin) store.set(PIN_KEY, d.pin); if(d.personel) store.set('sa_servis_personel', d.personel);
+        openSheet('<div class="center"><div class="big">✅</div><h3>'+(res.sent ? 'Anket gönderildi' : 'Anket planlandı')+'</h3><p>'+
+          (res.sent ? esc(d.email)+' adresine gönderildi.' : esc(res.due)+' tarihinde '+esc(d.email)+' adresine gönderilecek.')+
+          '<br><span class="muted">Referans No: '+esc(res.no)+'</span></p><button class="btn primary" id="again">Yeni anket</button>'+
+          '<a class="btn" style="width:100%;margin-top:8px;background:#f0f1f3;text-decoration:none;color:var(--ink)" href="index.html">Servis raporuna dön</a></div>');
+        $('again').onclick = function(){ ['firma','yetkili','email'].forEach(function(k){ $(k).value=''; }); closeSheet(); window.scrollTo(0,0); };
+      };
+      if(!LIVE){ setTimeout(function(){ done({ sent: d.zaman==='now', no:'A-DEMO', due:'yarın 09:00' }); }, 800); return; }
+      apiPost({ action:'surveyOnly', data:d }).then(done).catch(function(e){
+        $('sendBtn').disabled=false; closeSheet(); showErr((e&&e.message)||'Gönderilemedi.');
+      });
+    };
+  };
+
+  if(LIVE){
+    var cached=null; try { cached = JSON.parse(store.get(INIT_KEY)||'null'); } catch(e){}
+    if(store.get(PIN_KEY)) $('pin').value = store.get(PIN_KEY);
+    if(cached) init(cached);
+    apiGet({ action:'init', pin: $('pin').value }).then(function(data){
+      if(data.pinOk && $('pin').value) store.set(PIN_KEY, $('pin').value);
+      try { localStorage.setItem(INIT_KEY, JSON.stringify(data)); } catch(e){}
+      init(data);
+    }).catch(function(){ if(!cached) showErr('Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.'); });
+  } else {
+    $('demo').style.display='block';
+    init({ staff:['Personel 1','Personel 2'], pinRequired:false, pinOk:true, customers:[] });
+  }
+})();
+</script>
+</body>
+</html>
