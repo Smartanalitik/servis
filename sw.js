@@ -1,7 +1,7 @@
 // Formun internet yokken de açılması için uygulama dosyalarını telefonda saklar.
-// Dosyaları güncellediğinizde aşağıdaki sürüm numarasını artırın (v1 -> v2).
-const CACHE = 'sa-servis-v1';
-const FILES = ['./', './index.html', './config.js', './manifest.json', './icon-192.png', './apple-touch-icon.png'];
+// Dosyaları güncellediğinizde aşağıdaki sürüm numarasını artırın (v2 -> v3).
+const CACHE = 'sa-servis-v2';
+const FILES = ['./', './index.html', './anket-gonder.html', './config.js', './manifest.json', './icon-192.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
