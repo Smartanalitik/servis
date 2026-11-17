@@ -76,10 +76,7 @@
 </head>
 <body>
 <header>
-  <div class="logo">
-    <svg viewBox="0 0 34 26"><path d="M0 0L16 13L0 26Z" fill="#1e88e5"/><path d="M8 0L24 13L8 26" fill="none" stroke="#1f2230" stroke-width="1.6"/><path d="M15 0L31 13L15 26" fill="none" stroke="#1f2230" stroke-width="1.6"/></svg>
-    <div><b>SMART</b><small>ANALİTİK</small></div>
-  </div>
+  <div class="logo"><img src="logo.png" alt="Smart Analitik" style="height:36px;display:block"></div>
   <h1>Teknik Servis<br>Raporu</h1>
 </header>
 
@@ -429,7 +426,6 @@
   // ---------- Başlangıç ----------
   loadDraft();
   function init(data){
-    if(data.logo){ var lg=document.querySelector('.logo'); lg.innerHTML=''; var im=new Image(); im.src=data.logo; im.alt='Smart Analitik'; im.style.height='38px'; lg.appendChild(im); }
     fillStaff(data.staff || []); fillCustomers(data.customers);
     state.pinRequired = !!data.pinRequired; state.requireSig = !!data.requireCustomerSignature;
     $('pinCard').style.display = (state.pinRequired && !data.pinOk) ? '' : 'none';

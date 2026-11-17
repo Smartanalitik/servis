@@ -75,7 +75,7 @@
 <body>
 <div class="page">
   <div class="hdr">
-    <div class="lg" id="logo"><div class="brand"><b>SMART</b><small>ANALİTİK</small></div></div>
+    <div class="lg" id="logo"><img src="logo.png" alt="Smart Analitik"></div>
     <div class="tt">MÜŞTERİ MEMNUNİYETİ ANKETİ</div>
     <div class="dc"><table class="doc">
       <tr><td>Doküman No:</td><td id="dNo">F060-0010</td></tr>
@@ -129,7 +129,6 @@
   function getJSON(u){ return fetch(u, { credentials:'omit' }).then(function(r){ return r.json(); }); }
 
   function render(d){
-    if(d.logo) $('logo').innerHTML = '<img src="'+esc(d.logo)+'" alt="Smart Analitik">';
     if(d.doc){ $('dNo').textContent=d.doc.no; $('dPub').textContent=d.doc.publish; $('dRev').textContent=d.doc.rev; $('dRevD').textContent=d.doc.revDate; }
     if(d.footer) $('foot').innerHTML = '<b>'+esc(d.footer.name)+'</b><br>'+esc(d.footer.address)+'<br>'+esc(d.footer.contact);
     if(d.state === 'invalid') return show('invalid');
